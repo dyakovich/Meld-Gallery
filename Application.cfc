@@ -33,7 +33,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 			<cfreturn false>
 		</cfif>
 	</cffunction>
-	
+
 	<cffunction name="secureRequest" output="false">
 		<cfargument name="$">
 		<cfif isAdminRequest() and not ($.currentUser().isSuperUser() or $.currentUser().isInGroup('admin') eq true)>
@@ -45,7 +45,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 			</cfif>
 		</cfif>
 	</cffunction>
-	
+
 	<cffunction name="setupRequest" output="false">
 		<cfset var muraScope = "" />
 
@@ -61,7 +61,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 		<cfset var coldspringXml			= "" />
 		<cfset var coldspringXmlPath		= "" />
 		<cfset var defaultProperties		= StructNew()>
-	
+
 		<!--- ensure that we have PluginConfig in the variables scope and $ --->
 		<cfif not isDefined("variables.pluginConfig") or variables.pluginConfig.getPackage() neq variables.framework.applicationKey>
 			<cfset variables.pluginConfig=application.pluginManager.getConfig(variables.framework.applicationKey)>
@@ -70,7 +70,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 		<cfif not isDefined("$")>
 			<cfset $ = getMuraScope() />
 		</cfif>
-				
+
 		<cfset coldspringXmlPath	= "#expandPath('/plugins')#/#variables.pluginConfig.getDirectory()#/coldspring/coldspring.xml.cfm" />
 
 		<!--- read in coldspringXml --->
@@ -90,7 +90,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 		<cfset defaultProperties.muradsnusername	= $.globalConfig().getValue( "dbusername" )>
 		<cfset defaultProperties.muradsnpassword	= $.globalConfig().getValue( "dbpassword" )>
 		<cfset defaultProperties.muradsntype		= $.globalConfig().getValue( "dbtype" )>
-	
+
 		<cfset defaultProperties.pluginFileRoot		= expandpath("/#variables.pluginConfig.getPackage()#")>
 		<cfset defaultProperties.pluginDirectory	= variables.pluginConfig.getDirectory()>
 		<cfset defaultProperties.fileDirectory		= $.globalConfig().getFileDir()>
@@ -104,7 +104,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 		<cfelse>
 			<cfset defaultProperties.rblocale			= "en" />
 		</cfif>
-		
+
 		<cfset variables.pluginConfig.setValue("DefaultProperties",defaultProperties) />
 
 		<!--- build CS factory --->
@@ -143,7 +143,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 		<cfif variables.framework.reloadApplicationOnEveryRequest or StructKeyExists(url,variables.framework.reload)>
 			<cfset application[ variables.framework.applicationKey & "BeanFactory" ] = beanFactory>
 		</cfif>
-		
+
 		<cfset setupSubSystems() />
 	</cffunction>
 
@@ -157,7 +157,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 		<cfset var defaultProperties		= StructNew()>
 
 		<cfset var sArgs					= StructNew() />
-	
+
 		<cfif not isDefined("variables.pluginConfig") or variables.pluginConfig.getPackage() neq variables.framework.applicationKey>
 			<cfset variables.pluginConfig=application.pluginManager.getConfig(variables.framework.applicationKey)>
 		</cfif>
@@ -178,11 +178,11 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 		<!--- if the subApplication has it's own bean factory, read in coldspringXml --->
 		<cfif fileExists( coldspringXmlPath )>
 			<cffile action="read" file="#coldspringXmlPath#" variable="coldspringXml" />
-	
+
 		<!--- parse the coldspringXml and replace all [plugin] with the plugin mapping path, and |plugin| with the physical path --->
 			<cfset coldspringXml = replaceNoCase( coldspringXml, "[plugin]", "plugins.#variables.pluginConfig.getDirectory()#.#arguments.subsystem#.", "ALL") />
 			<cfset coldspringXml = replaceNoCase( coldspringXml, "|plugin|", "plugins/#variables.pluginConfig.getDirectory()#/#arguments.subsystem#/", "ALL") />
-	
+
 			<!--- set the default values --->
 			<cfset defaultProperties.dsn				= variables.pluginConfig.getSetting( "dsn" )>
 			<cfset defaultProperties.dsnusername		= variables.pluginConfig.getSetting( "dsnusername" )>
@@ -198,13 +198,13 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 			<cfset defaultProperties.pluginConfig		= variables.pluginConfig>
 
 			<cfset defaultProperties.applicationKey		= lcase(variables.pluginConfig.getPackage())>
-				
+
 			<cfif isDefined("session") and StructKeyExists( session,'locale')>
 				<cfset defaultProperties.rblocale			= session.locale />
 			<cfelse>
 				<cfset defaultProperties.rblocale			= "en" />
 			</cfif>
-	
+
 			<!--- build CS factory --->
 			<cfset beanFactory=createObject("component","coldspring.beans.DefaultXmlBeanFactory").init( defaultProperties=defaultProperties ) />
 			<!--- load beans --->
@@ -218,9 +218,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 	<cffunction name="setupSubSystems" output="false">
 		<cfset var sArgs			= StructNew() />
 
-		<cfset var displayTypeService		= getBeanFactory().getBean("DisplayTypeService") /> 
-		<cfset var aDisplayObjectTypes		= displayTypeService.getDisplayTypes( argumentCollection=sArgs ) /> 
-	
+		<cfset var displayTypeService		= getBeanFactory().getBean("DisplayTypeService") />
+		<cfset var aDisplayObjectTypes		= displayTypeService.getDisplayTypes( argumentCollection=sArgs ) />
+
 		<cfloop from="1" to="#ArrayLen( aDisplayObjectTypes )#" index="iiX">
 			<cfset registerSubsystem( aDisplayObjectTypes[iiX].getPackage(),aDisplayObjectTypes[iiX] ) />
 			<cfset setupSubsystem( aDisplayObjectTypes[iiX].getPackage() ) />
@@ -234,7 +234,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 		<cfset var displayPath				= "" />
 		<cfset var muraDisplayObjectManager	= getBeanFactory().getBean("muraDisplayObjectManager") />
 		<cfset var muraEventHandlerManager	= getBeanFactory().getBean("muraEventHandlerManager") />
-		<cfset var displaytypeService		= getBeanFactory().getBean("DisplaytypeService") /> 
+		<cfset var displaytypeService		= getBeanFactory().getBean("DisplaytypeService") />
 		<cfset var displayObjectBean		= "" />
 
 		<cfset var sArgs					= StructNew() />
@@ -271,14 +271,14 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 				<cfset displayTypeService.updateDisplaytype( displayTypeBean ) />
 			</cfif>
 		</cfif>
-				
+
 		<!--- check/register the event handler --->
 		<cfif directoryExists( "#displayPath#/events" ) and fileExists( "#displayPath#/events/eventHandler.cfc" ) >
 			<cfset sArgs = StructNew() />
 			<cfset sArgs.moduleID		= getPluginConfig().getValue('moduleID') />
 			<cfset sArgs.component		= "#arguments.subsystem#.events.eventHandler" />
 			<cfset sArgs.runat			= "onApplicationLoad" />
-			
+
 			<cfset muraEventHandlerManager.registerEventHandler( argumentCollection=sArgs ) />
 		</cfif>
 	</cffunction>
@@ -311,7 +311,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 		<cfif left(url.action,1) eq "c" and not findNoCase(pluginConfig.getDirectory(),cgi.script_name)>
 			<cflocation url="./?ma=#url.action#" addtoken="false" />
 		<cfelse>
-			<cfset super.onMissingView( argumentCollection=arguments ) />			
+			<cfset super.onMissingView( argumentCollection=arguments ) />
 		</cfif>
 	</cffunction>
 
@@ -320,7 +320,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 		<cfinclude template="frameworkConfig.cfm" />
 
-		<cfreturn framework />		
+		<cfreturn framework />
 	</cffunction>
 
 	<cffunction name="preseveInternalState" output="false">
@@ -328,47 +328,47 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 		<cfset var preserveKeyList="context,base,cfcbase,subsystem,subsystembase,section,item,services,action,controllerExecutionStarted">
 		<cfset var preserveKeys=structNew()>
 		<cfset var k="">
-		
+
 		<cfloop list="#preserveKeyList#" index="k">
 			<cfif isDefined("arguments.state.#k#")>
 				<cfset preserveKeys[k]=arguments.state[k]>
 				<cfset structDelete(arguments.state,k)>
 			</cfif>
 		</cfloop>
-		
+
 		<cfif StructKeyExists(request,'controllers')>
 			<cfset structDelete(request,'controllers') />
 		</cfif>
-		
+
 		<cfset structDelete( arguments.state, "serviceExecutionComplete" )>
-		
+
 		<cfreturn preserveKeys>
 	</cffunction>
-		
+
 	<cffunction name="restoreInternalState" output="false">
 		<cfargument name="state">
 		<cfargument name="restore">
 		<cfset var preserveKeyList="context,base,cfcbase,subsystem,subsystembase,section,item,services,action,controllerExecutionStarted">
-		
+
 		<cfloop list="#preserveKeyList#" index="k">
 				<cfset structDelete(arguments.state,k)>
 		</cfloop>
-		
+
 		<cfset structAppend(state,restore,true)>
 		<cfset structDelete( state, "serviceExecutionComplete" )>
 	</cffunction>
-	
+
 	<cffunction name="getMuraScope" output="false">
 		<cfset var $ = application.serviceFactory.getBean("MuraScope")>
 		<cfset var sInitArgs = StructNew()>
 
-		<cfif  structKeyExists(session,"siteID")>
+		<cfif isDefined('session.siteId')>
 			<cfset sInitArgs.siteID = session.siteID>
 		<cfelse>
 			<cfset sInitArgs.siteID = "default">
 		</cfif>
 		<cfset $.init(sInitArgs)>
-		
+
 		<cfreturn $ />
 	</cffunction>
 </cfcomponent>
