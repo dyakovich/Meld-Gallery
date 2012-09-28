@@ -62,89 +62,87 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 		<cfset var coldspringXmlPath		= "" />
 		<cfset var defaultProperties		= StructNew()>
 
-		<cflock type="exclusive" timeout="50">
-			<!--- ensure that we have PluginConfig in the variables scope and $ --->
-			<cfif not isDefined("variables.pluginConfig") or variables.pluginConfig.getPackage() neq variables.framework.applicationKey>
-				<cfset variables.pluginConfig=application.pluginManager.getConfig(variables.framework.applicationKey)>
-			</cfif>
+		<!--- ensure that we have PluginConfig in the variables scope and $ --->
+		<cfif not isDefined("variables.pluginConfig") or variables.pluginConfig.getPackage() neq variables.framework.applicationKey>
+			<cfset variables.pluginConfig=application.pluginManager.getConfig(variables.framework.applicationKey)>
+		</cfif>
 
-			<cfif not isDefined("$")>
-				<cfset $ = getMuraScope() />
-			</cfif>
+		<cfif not isDefined("$")>
+			<cfset $ = getMuraScope() />
+		</cfif>
 
-			<cfset coldspringXmlPath	= "#expandPath('/plugins')#/#variables.pluginConfig.getDirectory()#/coldspring/coldspring.xml.cfm" />
+		<cfset coldspringXmlPath	= "#expandPath('/plugins')#/#variables.pluginConfig.getDirectory()#/coldspring/coldspring.xml.cfm" />
 
-			<!--- read in coldspringXml --->
-			<cffile action="read" file="#coldspringXmlPath#" variable="coldspringXml" />
+		<!--- read in coldspringXml --->
+		<cffile action="read" file="#coldspringXmlPath#" variable="coldspringXml" />
 
-			<!--- parse the coldspringXml and replace all [plugin] with the plugin mapping path, and |plugin| with the physical path --->
-			<cfset coldspringXml = replaceNoCase( coldspringXml, "[plugin]", "plugins.#variables.pluginConfig.getDirectory()#.", "ALL") />
-			<cfset coldspringXml = replaceNoCase( coldspringXml, "|plugin|", "plugins/#variables.pluginConfig.getDirectory()#/", "ALL") />
+		<!--- parse the coldspringXml and replace all [plugin] with the plugin mapping path, and |plugin| with the physical path --->
+		<cfset coldspringXml = replaceNoCase( coldspringXml, "[plugin]", "plugins.#variables.pluginConfig.getDirectory()#.", "ALL") />
+		<cfset coldspringXml = replaceNoCase( coldspringXml, "|plugin|", "plugins/#variables.pluginConfig.getDirectory()#/", "ALL") />
 
-			<cfset defaultProperties.dsn				= variables.pluginConfig.getSetting( "dsn" )>
-			<cfset defaultProperties.dsnusername		= variables.pluginConfig.getSetting( "dsnusername" )>
-			<cfset defaultProperties.dsnpassword		= variables.pluginConfig.getSetting( "dsnpassword" )>
-			<cfset defaultProperties.dsnprefix			= variables.pluginConfig.getSetting( "dsnprefix" )>
-			<cfset defaultProperties.dsntype			= variables.pluginConfig.getSetting( "dsntype" )>
+		<cfset defaultProperties.dsn				= variables.pluginConfig.getSetting( "dsn" )>
+		<cfset defaultProperties.dsnusername		= variables.pluginConfig.getSetting( "dsnusername" )>
+		<cfset defaultProperties.dsnpassword		= variables.pluginConfig.getSetting( "dsnpassword" )>
+		<cfset defaultProperties.dsnprefix			= variables.pluginConfig.getSetting( "dsnprefix" )>
+		<cfset defaultProperties.dsntype			= variables.pluginConfig.getSetting( "dsntype" )>
 
-			<cfset defaultProperties.muradsn			= $.globalConfig().getValue( "datasource" )>
-			<cfset defaultProperties.muradsnusername	= $.globalConfig().getValue( "dbusername" )>
-			<cfset defaultProperties.muradsnpassword	= $.globalConfig().getValue( "dbpassword" )>
-			<cfset defaultProperties.muradsntype		= $.globalConfig().getValue( "dbtype" )>
+		<cfset defaultProperties.muradsn			= $.globalConfig().getValue( "datasource" )>
+		<cfset defaultProperties.muradsnusername	= $.globalConfig().getValue( "dbusername" )>
+		<cfset defaultProperties.muradsnpassword	= $.globalConfig().getValue( "dbpassword" )>
+		<cfset defaultProperties.muradsntype		= $.globalConfig().getValue( "dbtype" )>
 
-			<cfset defaultProperties.pluginFileRoot		= expandpath("/#variables.pluginConfig.getPackage()#")>
-			<cfset defaultProperties.pluginDirectory	= variables.pluginConfig.getDirectory()>
-			<cfset defaultProperties.fileDirectory		= $.globalConfig().getFileDir()>
-			<cfset defaultProperties.muraWebRoot		= application.configBean.getContext()>
-			<cfset defaultProperties.pluginConfig		= variables.pluginConfig>
+		<cfset defaultProperties.pluginFileRoot		= expandpath("/#variables.pluginConfig.getPackage()#")>
+		<cfset defaultProperties.pluginDirectory	= variables.pluginConfig.getDirectory()>
+		<cfset defaultProperties.fileDirectory		= $.globalConfig().getFileDir()>
+		<cfset defaultProperties.muraWebRoot		= application.configBean.getContext()>
+		<cfset defaultProperties.pluginConfig		= variables.pluginConfig>
 
-			<cfset defaultProperties.applicationKey		= lcase(variables.pluginConfig.getPackage())>
+		<cfset defaultProperties.applicationKey		= lcase(variables.pluginConfig.getPackage())>
 
-			<cfif isDefined("session") and StructKeyExists( session,'locale')>
-				<cfset defaultProperties.rblocale			= session.locale />
-			<cfelse>
-				<cfset defaultProperties.rblocale			= "en" />
-			</cfif>
+		<cfif isDefined("session") and StructKeyExists( session,'locale')>
+			<cfset defaultProperties.rblocale			= session.locale />
+		<cfelse>
+			<cfset defaultProperties.rblocale			= "en" />
+		</cfif>
 
-			<cfset variables.pluginConfig.setValue("DefaultProperties",defaultProperties) />
+		<cfset variables.pluginConfig.setValue("DefaultProperties",defaultProperties) />
 
-			<!--- build CS factory --->
-			<cfset beanFactory=createObject("component","coldspring.beans.DefaultXmlBeanFactory").init( defaultProperties=defaultProperties ) />
+		<!--- build CS factory --->
+		<cfset beanFactory=createObject("component","coldspring.beans.DefaultXmlBeanFactory").init( defaultProperties=defaultProperties ) />
 
-			<!--- load beans --->
-			<cfset beanFactory.loadBeansFromXmlRaw( coldspringXml ) />
+		<!--- load beans --->
+		<cfset beanFactory.loadBeansFromXmlRaw( coldspringXml ) />
 
-			<!--- set the FW/1 bean factory as our new ColdSpring bean factory --->
-			<cfset setBeanFactory( beanFactory ) />
+		<!--- set the FW/1 bean factory as our new ColdSpring bean factory --->
+		<cfset setBeanFactory( beanFactory ) />
 
-			<!---
-				NOTE: do not set Mura's service factory as parent to our bean factory, as getBean() will
-				default to Mura's, not ours!
-			--->
+		<!---
+			NOTE: do not set Mura's service factory as parent to our bean factory, as getBean() will
+			default to Mura's, not ours!
+		--->
 
-			<!--- set the pluginConfig for our plugin into the fw1 application scope --->
-			<cfset setPluginConfig( variables.pluginConfig )>
+		<!--- set the pluginConfig for our plugin into the fw1 application scope --->
+		<cfset setPluginConfig( variables.pluginConfig )>
 
-			<!--- push the ColdSpring factory into plugin application scope --->
-			<cfset variables.pluginConfig.getApplication().setValue( "beanFactory", beanFactory ) />
+		<!--- push the ColdSpring factory into plugin application scope --->
+		<cfset variables.pluginConfig.getApplication().setValue( "beanFactory", beanFactory ) />
 
-			<cfset beanFactory.getBean('MuraManager').setServiceFactory( $.event().getServiceFactory() ) />
+		<cfset beanFactory.getBean('MuraManager').setServiceFactory( $.event().getServiceFactory() ) />
 
-			<!--- push the ColdSpring factory and pluginConfig into the manager --->
-			<cfset beanFactory.getBean('MeldGalleryManager').setBeanFactory( beanFactory ) />
-			<cfset beanFactory.getBean('MeldGalleryManager').setPluginConfig( getPluginConfig() ) />
+		<!--- push the ColdSpring factory and pluginConfig into the manager --->
+		<cfset beanFactory.getBean('MeldGalleryManager').setBeanFactory( beanFactory ) />
+		<cfset beanFactory.getBean('MeldGalleryManager').setPluginConfig( getPluginConfig() ) />
 
-			<!--- Mura Interfaces --->
-			<cfset beanFactory.getBean('MuraDisplayObjectManager').setMuraScope( $ ) />
-			<cfset beanFactory.getBean('MuraEventHandlerManager').setMuraScope( $ ) />
+		<!--- Mura Interfaces --->
+		<cfset beanFactory.getBean('MuraDisplayObjectManager').setMuraScope( $ ) />
+		<cfset beanFactory.getBean('MuraEventHandlerManager').setMuraScope( $ ) />
 
-			<!--- set the main FW/1 bean factory as the parent factory --->
-			<cfset beanFactory.getBean("mmResourceBundle").setParentFactory( $.SiteConfig().getRBFActory() ) />
+		<!--- set the main FW/1 bean factory as the parent factory --->
+		<cfset beanFactory.getBean("mmResourceBundle").setParentFactory( $.SiteConfig().getRBFActory() ) />
 
-			<cfif variables.framework.reloadApplicationOnEveryRequest or StructKeyExists(url,variables.framework.reload)>
-				<cfset application[ variables.framework.applicationKey & "BeanFactory" ] = beanFactory>
-			</cfif>
-		</cflock>
+		<cfif variables.framework.reloadApplicationOnEveryRequest or StructKeyExists(url,variables.framework.reload)>
+			<cfset application[ variables.framework.applicationKey & "BeanFactory" ] = beanFactory>
+		</cfif>
 
 		<cfset setupSubSystems() />
 	</cffunction>
